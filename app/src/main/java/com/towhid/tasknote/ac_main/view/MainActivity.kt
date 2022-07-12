@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         job = Job()
         setContentView(R.layout.activity_main)
+
     }
 
     override fun onDestroy() {
