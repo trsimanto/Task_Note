@@ -2,4 +2,5 @@
     <string name="app_name">Task Note</string>
     <string name="add">Add</string>
     <string name="your_task_list_is_empty_nadd_your_task">Your Task List Is Empty\nAdd Your Task</string>
+    <string name="tag">tag</string>
 </resources>
