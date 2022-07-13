@@ -5,62 +5,45 @@ import android.os.Bundle
 import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.towhid.tasknote.R
+import com.towhid.tasknote.ac_main.adapter.RecylerAdapterTask
 import com.towhid.tasknote.ac_main.listener.TaskClickListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
+import com.towhid.tasknote.ac_main.model.Task
+import com.towhid.tasknote.ac_main.viewModel.TaskViewModel
+import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), CoroutineScope , TaskClickListener {
-
-    lateinit var job: Job
-
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
+class MainActivity : AppCompatActivity(), TaskClickListener {
 
 
-    var productViewModel: ProductViewModel? = null
-    var add: ImageView? = null
-    var rec_product: RecyclerView? = null
-    var recylerAdapterProduct: RecylerAdapterProduct? = null
-    var productList: List<Product>? = null
-    var empty_text: TextView? = null
-
+    lateinit var taskViewModel: TaskViewModel
+    var taskList = mutableListOf<Task>()
+    private lateinit var recylerAdapterTask: RecylerAdapterTask
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        job = Job()
         setContentView(R.layout.activity_main)
+        init()
+        action()
+    }
 
-        productViewModel = ViewModelProvider(this).get(ProductViewModel::class.java)
-
-        rec_product = findViewById<View>(R.id.rec_product) as RecyclerView
-        productList = ArrayList<Product>()
-        recylerAdapterProduct = RecylerAdapterProduct(this, this, productList)
-        rec_product!!.layoutManager = LinearLayoutManager(this)
-        rec_product!!.adapter = recylerAdapterProduct
-        viewAllProducts()
-
-        add!!.setOnClickListener {
+    private fun action() {
+        viewAllTask()
+        add.setOnClickListener {
             val dialog = Dialog(this@MainActivity)
             dialog.setContentView(R.layout.dialog_add_product)
             dialog.create()
             dialog.findViewById<View>(R.id.add_button).setOnClickListener {
                 val productName = dialog.findViewById<EditText>(R.id.product_name)
                 val emergency = dialog.findViewById<CheckBox>(R.id.emergency_button)
-                productViewModel.insertProduct(
-                    Product(
-                        productName.text.toString(),
-                        emergency.isChecked
+                taskViewModel.insertTask(
+                    Task(
+                        taskName = productName.text.toString(),
+                        isEmergency = emergency.isChecked
                     )
                 )
                 dialog.dismiss()
@@ -80,47 +63,46 @@ class MainActivity : AppCompatActivity(), CoroutineScope , TaskClickListener {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 deleteProduct(viewHolder.adapterPosition)
             }
-        }).attachToRecyclerView(rec_product)
-
+        }).attachToRecyclerView(rec_task)
 
     }
 
+    private fun init(){
+        taskViewModel =
+            ViewModelProvider(this)[TaskViewModel::class.java]
+        recylerAdapterTask = RecylerAdapterTask(this, this, taskList)
+        rec_task.layoutManager = LinearLayoutManager(this)
+        rec_task.adapter = recylerAdapterTask
+
+ }
     private fun deleteProduct(position: Int) {
-        productViewModel.deleteProduct(productList!![position])
+        taskViewModel.deleteTask(taskList[position])
     }
-
-    private fun viewAllProducts() {
-        productViewModel.getAllProdects().observe(this@MainActivity,
-            Observer<List<Any?>> { products ->
-                if (products.isEmpty()) empty_text!!.visibility =
-                    View.VISIBLE else empty_text!!.visibility =
-                    View.GONE
-                productList.clear()
-                productList.addAll(products)
-                recylerAdapterProduct.notifyDataSetChanged()
-                //  Toast.makeText(MainActivity.this, products.size() + "", Toast.LENGTH_SHORT).show();
-            })
+    private fun viewAllTask() {
+        taskViewModel.allTaskList.observe(this@MainActivity) { products ->
+            if (products.isEmpty()) empty_text!!.visibility =
+                View.VISIBLE else empty_text!!.visibility =
+                View.GONE
+            taskList.clear()
+            taskList.addAll(products)
+            recylerAdapterTask.notifyDataSetChanged()
+        }
     }
-
-    override fun onItemClick(product: Product) {
+    override fun onItemClick(product: Task) {
         val dialog = Dialog(this@MainActivity)
         dialog.setContentView(R.layout.dialog_update_product)
         dialog.create()
         val productName = dialog.findViewById<EditText>(R.id.product_name)
         val emergency = dialog.findViewById<CheckBox>(R.id.emergency_button)
-        productName.setText(product.getProductName())
-        emergency.isChecked = product.isEmergency()
+        productName.setText(product.taskName)
+        emergency.isChecked = product.isEmergency
         dialog.findViewById<View>(R.id.update_button).setOnClickListener {
-            product.setProductName(productName.text.toString())
-            product.setEmergency(emergency.isChecked)
-            productViewModel.updateProduct(product)
+            product.taskName = productName.text.toString()
+            product.isEmergency = emergency.isChecked
+            taskViewModel.updateTask(product)
             dialog.dismiss()
         }
         dialog.show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-    }
 }

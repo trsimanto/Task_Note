@@ -8,30 +8,32 @@ import com.towhid.tasknote.ac_main.model.Task
 
 @Database(
     entities = [Task::class],
-    version = 1
+    version = 1,
+    exportSchema = true
 )
-abstract class TaskDatabase : RoomDatabase(){
-
-    abstract fun getTaskDao() : TaskDao
+abstract class TaskDatabase: RoomDatabase() {
+    abstract fun taskDao(): TaskDao
 
     companion object {
+        @Volatile
+        private var INSTANCE: TaskDatabase? = null
 
-        @Volatile private var instance : TaskDatabase? = null
-        private val LOCK = Any()
+        fun getDatabase(context: Context): TaskDatabase{
+            val tempInstance = INSTANCE
 
-        operator fun invoke(context: Context) = instance ?: synchronized(LOCK){
-            instance ?: buildDatabase(context).also {
-                instance = it
+            if (tempInstance != null) {
+                return tempInstance
+            }
+            synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    TaskDatabase::class.java,
+                    "task_database"
+                ).build()
+                INSTANCE = instance
+                return instance
             }
         }
-
-        private fun buildDatabase(context: Context) = Room.databaseBuilder(
-            context.applicationContext,
-            TaskDatabase::class.java,
-            "task_Database"
-        ).build()
-
     }
 }
-
 
