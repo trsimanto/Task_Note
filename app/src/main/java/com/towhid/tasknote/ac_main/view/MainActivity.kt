@@ -3,8 +3,10 @@ package com.towhid.tasknote.ac_main.view
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -35,7 +37,7 @@ class MainActivity : AppCompatActivity(), TaskClickListener {
         viewAllTask()
         add.setOnClickListener {
             val dialog = Dialog(this@MainActivity)
-            dialog.setContentView(R.layout.dialog_add_product)
+            dialog.setContentView(R.layout.dialog_add_update_product)
             dialog.create()
             dialog.findViewById<View>(R.id.add_button).setOnClickListener {
                 val productName = dialog.findViewById<EditText>(R.id.product_name)
@@ -90,13 +92,15 @@ class MainActivity : AppCompatActivity(), TaskClickListener {
     }
     override fun onItemClick(product: Task) {
         val dialog = Dialog(this@MainActivity)
-        dialog.setContentView(R.layout.dialog_update_product)
+        dialog.setContentView(R.layout.dialog_add_update_product)
         dialog.create()
         val productName = dialog.findViewById<EditText>(R.id.product_name)
         val emergency = dialog.findViewById<CheckBox>(R.id.emergency_button)
+        val update_button = dialog.findViewById<TextView>(R.id.add_button)
         productName.setText(product.taskName)
+        update_button.text = "Update"
         emergency.isChecked = product.isEmergency
-        dialog.findViewById<View>(R.id.update_button).setOnClickListener {
+        update_button.setOnClickListener {
             product.taskName = productName.text.toString()
             product.isEmergency = emergency.isChecked
             taskViewModel.updateTask(product)

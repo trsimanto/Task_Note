@@ -3,4 +3,6 @@
     <string name="add">Add</string>
     <string name="your_task_list_is_empty_nadd_your_task">Your Task List Is Empty\nAdd Your Task</string>
     <string name="tag">tag</string>
+    <string name="task_name">Task Name</string>
+    <string name="emergency">Emergency</string>
 </resources>
