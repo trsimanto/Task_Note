@@ -36,7 +36,7 @@ class RecylerAdapterTask(
         else holder.itemView.tags.setBackgroundResource(
             R.color.colorGreen
         )
-       // holder.product.setOnClickListener { mainActivity.onItemClick(mData[position]) }
+        holder.itemView.task.setOnClickListener { mainActivity.onItemClick(mData[position]) }
     }
 
     override fun getItemCount(): Int {
